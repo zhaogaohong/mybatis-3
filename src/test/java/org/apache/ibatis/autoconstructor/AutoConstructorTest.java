@@ -44,6 +44,9 @@ class AutoConstructorTest {
     // populate in-memory database
     BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
         "org/apache/ibatis/autoconstructor/CreateDB.sql");
+
+    //创建 SqlSessionFactory 对象，基于 mybatis-config.xml 配置文件。
+    //初始化数据到内存数据库，基于 CreateDB.sql SQL 文件。
   }
 
   @Test

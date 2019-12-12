@@ -23,17 +23,28 @@ import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
+ * 实现 ObjectWrapper 接口，ObjectWrapper 抽象类，为子类 BeanWrapper 和 MapWrapper 提供属性值的获取和设置的公用方法
  * @author Clinton Begin
  */
 public abstract class BaseWrapper implements ObjectWrapper {
 
   protected static final Object[] NO_ARGUMENTS = new Object[0];
+  /**
+   * MetaObject 对象
+   */
   protected final MetaObject metaObject;
 
   protected BaseWrapper(MetaObject metaObject) {
     this.metaObject = metaObject;
   }
 
+  /**
+   * 获得指定属性的值
+   *
+   * @param prop PropertyTokenizer 对象
+   * @param object 指定 Object 对象
+   * @return 值
+   */
   protected Object resolveCollection(PropertyTokenizer prop, Object object) {
     if ("".equals(prop.getName())) {
       return object;
@@ -42,6 +53,13 @@ public abstract class BaseWrapper implements ObjectWrapper {
     }
   }
 
+  /**
+   * 获得集合中指定位置的值
+   *
+   * @param prop PropertyTokenizer 对象
+   * @param collection 集合
+   * @return 值
+   */
   protected Object getCollectionValue(PropertyTokenizer prop, Object collection) {
     if (collection instanceof Map) {
       return ((Map) collection).get(prop.getIndex());
@@ -73,6 +91,13 @@ public abstract class BaseWrapper implements ObjectWrapper {
     }
   }
 
+  /**
+   * 设置集合中指定位置的值
+   *
+   * @param prop PropertyTokenizer 对象
+   * @param collection 集合
+   * @param value 值
+   */
   protected void setCollectionValue(PropertyTokenizer prop, Object collection, Object value) {
     if (collection instanceof Map) {
       ((Map) collection).put(prop.getIndex(), value);
