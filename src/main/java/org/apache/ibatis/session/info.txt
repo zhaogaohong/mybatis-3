@@ -1,0 +1,16 @@
+在 MyBatis 初始化过程中，会加载 mybatis-config.xml 配置文件、映射配置文件以及 Mapper 接口中的注解信息，解析后的配置信息会形成相应的对象并保存到 Configuration 对象中。例如：
+
+<resultMap>节点(即 ResultSet 的映射规则) 会被解析成 ResultMap 对象。
+<result> 节点(即属性映射)会被解析成 ResultMapping 对象。
+之后，利用该 Configuration 对象创建 SqlSessionFactory对象。待 MyBatis 初始化之后，开发人员可以通过初始化得到 SqlSessionFactory 创建 SqlSession 对象并完成数据库操作。
+
+对应 builder 模块，为配置解析过程
+对应 mapping 模块，主要为 SQL 操作解析后的映射。
+因为整个 MyBatis 的初始化流程涉及代码颇多，所以拆分成三篇文章：
+
+加载 mybatis-config.xml 配置文件。
+加载 Mapper 映射配置文件。
+加载 Mapper 接口中的注解信息。
+本文就主要分享第一部分「加载 mybatis-config.xml 配置文件」。
+
+MyBatis 的初始化流程的入口是 SqlSessionFactoryBuilder 的 #build(Reader reader, String environment, Properties properties) 方法

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 鉴别器，代码比较简单，胖友直接点击 链接 查看，已经添加了完整的注释。
  * @author Clinton Begin
  */
 public class Discriminator {

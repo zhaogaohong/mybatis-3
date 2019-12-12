@@ -27,6 +27,7 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
+ * 实现 DatabaseIdProvider 接口，供应商数据库标识提供器实现类。
  * Vendor DatabaseId provider.
  *
  * It returns database product name as a databaseId.
@@ -39,6 +40,9 @@ import org.apache.ibatis.logging.LogFactory;
  */
 public class VendorDatabaseIdProvider implements DatabaseIdProvider {
 
+  /**
+   * Properties 对象
+   */
   private Properties properties;
 
   @Override
@@ -47,6 +51,7 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
       throw new NullPointerException("dataSource cannot be null");
     }
     try {
+      // 获得数据库标识
       return getDatabaseName(dataSource);
     } catch (Exception e) {
       LogHolder.log.error("Could not get a databaseId from dataSource", e);
@@ -60,9 +65,11 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
   }
 
   private String getDatabaseName(DataSource dataSource) throws SQLException {
+    // <1> 获得数据库产品名
     String productName = getDatabaseProductName(dataSource);
     if (this.properties != null) {
       for (Map.Entry<Object, Object> property : properties.entrySet()) {
+        // 如果产品名包含 KEY ，则返回对应的  VALUE
         if (productName.contains((String) property.getKey())) {
           return (String) property.getValue();
         }
@@ -70,6 +77,7 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
       // no match, return null
       return null;
     }
+    // <3> 不存在 properties ，则直接返回 productName
     return productName;
   }
 
@@ -77,7 +85,9 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
     Connection con = null;
     try {
       con = dataSource.getConnection();
+      // 获得数据库连接
       DatabaseMetaData metaData = con.getMetaData();
+      // 获得数据库产品名
       return metaData.getDatabaseProductName();
     } finally {
       if (con != null) {
