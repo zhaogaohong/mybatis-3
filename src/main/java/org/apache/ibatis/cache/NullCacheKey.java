@@ -16,6 +16,7 @@
 package org.apache.ibatis.cache;
 
 /**
+ * 继承 CacheKey 类，空缓存键
  * @author Clinton Begin
  * @deprecated Since 3.5.3, This class never used and will be removed future version.
  */

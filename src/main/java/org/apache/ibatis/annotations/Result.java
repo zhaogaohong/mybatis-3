@@ -38,16 +38,12 @@ import org.apache.ibatis.type.UnknownTypeHandler;
 @Repeatable(Results.class)
 public @interface Result {
   /**
-   * Returns whether id column or not.
-   *
-   * @return {@code true} if id column; {@code false} if otherwise
+   * @return 是否是 ID 字段
    */
   boolean id() default false;
 
   /**
-   * Return the column name(or column label) to map to this argument.
-   *
-   * @return the column name(or column label)
+   * @return 数据库的字段
    */
   String column() default "";
 
@@ -59,23 +55,17 @@ public @interface Result {
   String property() default "";
 
   /**
-   * Return the java type for this argument.
-   *
-   * @return the java type
+   * @return Java Type
    */
   Class<?> javaType() default void.class;
 
   /**
-   * Return the jdbc type for column that map to this argument.
-   *
-   * @return the jdbc type
+   * @return JDBC Type
    */
   JdbcType jdbcType() default JdbcType.UNDEFINED;
 
   /**
-   * Returns the {@link TypeHandler} type for retrieving a column value from result set.
-   *
-   * @return the {@link TypeHandler} type
+   * @return 使用的 TypeHandler 处理器
    */
   Class<? extends TypeHandler> typeHandler() default UnknownTypeHandler.class;
 

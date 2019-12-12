@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 别名的注解
  * The annotation that specify alias name.
  *
  * <p><br>
@@ -39,9 +40,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Alias {
   /**
-   * Return the alias name.
-   *
-   * @return the alias name
+   * @return 别名
    */
   String value();
 }

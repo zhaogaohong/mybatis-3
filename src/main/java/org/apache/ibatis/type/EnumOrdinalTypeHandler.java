@@ -21,11 +21,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * 继承 BaseTypeHandler 抽象类，Enum 类型的 TypeHandler 实现类
  * @author Clinton Begin
  */
 public class EnumOrdinalTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
 
+  /**
+   * 枚举类
+   */
   private final Class<E> type;
+  /**
+   * {@link #type} 下所有的枚举
+   *
+   * @see Class#getEnumConstants()
+   */
   private final E[] enums;
 
   public EnumOrdinalTypeHandler(Class<E> type) {
@@ -41,12 +50,15 @@ public class EnumOrdinalTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E
 
   @Override
   public void setNonNullParameter(PreparedStatement ps, int i, E parameter, JdbcType jdbcType) throws SQLException {
+    // 将 Enum 转换成 int 类型
     ps.setInt(i, parameter.ordinal());
   }
 
   @Override
   public E getNullableResult(ResultSet rs, String columnName) throws SQLException {
+    // 获得 int 的值
     int ordinal = rs.getInt(columnName);
+    // 将 int 转换成 Enum 类型
     if (ordinal == 0 && rs.wasNull()) {
       return null;
     }
@@ -55,7 +67,9 @@ public class EnumOrdinalTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E
 
   @Override
   public E getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
+    // 获得 int 的值
     int ordinal = rs.getInt(columnIndex);
+    // 将 int 转换成 Enum 类型
     if (ordinal == 0 && rs.wasNull()) {
       return null;
     }
@@ -64,7 +78,9 @@ public class EnumOrdinalTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E
 
   @Override
   public E getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
+    // 获得 int 的值
     int ordinal = cs.getInt(columnIndex);
+    // 将 int 转换成 Enum 类型
     if (ordinal == 0 && cs.wasNull()) {
       return null;
     }

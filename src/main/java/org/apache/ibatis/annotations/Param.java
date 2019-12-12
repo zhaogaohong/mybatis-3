@@ -22,6 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 当映射器方法需多个参数，这个注解可以被应用于映射器方法参数来给每个参数一个名字。
+ * 否则，多参数将会以它们的顺序位置来被命名。比如 #{1}，#{2} 等，这是默认的。
+ *
+ * 使用 @Param("person") ，SQL 中参数应该被命名为 #{person} 。
  * The annotation that specify the parameter name.
  *
  * <p><br>

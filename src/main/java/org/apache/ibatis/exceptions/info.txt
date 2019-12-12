@@ -1,0 +1,16 @@
+异常模块，对应 exceptions 包:
+定义了 MyBatis 专有的 PersistenceException 和 TooManyResultsException 异常。
+实际上，我们会看到其他包，会和 parsing 包一样，都会定义其独有的异常类。但是，代码都是相同的。所以，这里就简单整理如下：
+
+reflection 包：ReflectionException
+logging 包：LogException
+builder 包：BuilderException、IncompleteElementException
+scripting 包：ScriptingException
+binding 包：BindingException
+type 包：TypeException
+session 包：SqlSessionException
+cache 包：CacheException
+transaction 包：TransactionException
+datasource 包：DataSourceException
+executor 包：ResultMapException、ExecutorException、BatchExecutorException
+plugin 包：PluginException

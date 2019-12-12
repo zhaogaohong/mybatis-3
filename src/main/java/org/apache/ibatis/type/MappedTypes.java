@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 匹配的 Java Type 类型的注解
  * The annotation that specify java types to map {@link TypeHandler}.
  *
  * <p><br>
@@ -36,12 +37,10 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target(ElementType.TYPE)  // 注册到类
 public @interface MappedTypes {
   /**
-   * Returns java types to map {@link TypeHandler}.
-   *
-   * @return java types
+   * @return 匹配的 Java Type 类型的数组
    */
   Class<?>[] value();
 }

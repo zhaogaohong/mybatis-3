@@ -32,11 +32,17 @@ import java.util.Properties;
  */
 public class Resources {
 
+  /**
+   * ClassLoaderWrapper 对象
+   */
   private static ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper();
 
   /**
    * Charset to use when calling getResourceAsReader.
    * null means use the system default.
+   */
+  /**
+   * 字符集
    */
   private static Charset charset;
 
@@ -125,6 +131,7 @@ public class Resources {
    */
   public static Properties getResourceAsProperties(String resource) throws IOException {
     Properties props = new Properties();
+    // 读取
     try (InputStream in = getResourceAsStream(resource)) {
       props.load(in);
     }
@@ -141,6 +148,7 @@ public class Resources {
    */
   public static Properties getResourceAsProperties(ClassLoader loader, String resource) throws IOException {
     Properties props = new Properties();
+    // 读取
     try (InputStream in = getResourceAsStream(loader, resource)) {
       props.load(in);
     }
@@ -206,6 +214,7 @@ public class Resources {
   }
 
   /**
+   * 静态方法，获得指定 URL
    * Gets a URL as an input stream
    *
    * @param urlString - the URL to get
@@ -214,11 +223,13 @@ public class Resources {
    */
   public static InputStream getUrlAsStream(String urlString) throws IOException {
     URL url = new URL(urlString);
+    // 打开 URLConnection
     URLConnection conn = url.openConnection();
     return conn.getInputStream();
   }
 
   /**
+   * 指定 URL 的 Reader
    * Gets a URL as a Reader
    *
    * @param urlString - the URL to get
