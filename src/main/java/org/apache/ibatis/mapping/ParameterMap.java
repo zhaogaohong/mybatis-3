@@ -21,6 +21,8 @@ import java.util.List;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * org.apache.ibatis.mapping.ParameterMap ，参数集合，
+ * 对应 paramType="" 或 paramMap="" 标签属性。代码比较简单，但是有点略长
  * @author Clinton Begin
  */
 public class ParameterMap {

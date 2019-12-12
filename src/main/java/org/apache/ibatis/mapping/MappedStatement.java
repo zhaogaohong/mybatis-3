@@ -29,6 +29,10 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * org.apache.ibatis.mapping.MappedStatement ，
+ * 映射的语句，每个 <select />、<insert />、<update />、<delete />
+ * 对应一个 MappedStatement 对象。代码比较简单，但是有点略长，胖友直接点击 链接 查看，
+ * 已经添加了完整的注释
  * @author Clinton Begin
  */
 public final class MappedStatement {
@@ -293,16 +297,19 @@ public final class MappedStatement {
     return resultSets;
   }
 
+  //获得 BoundSql 对象
   public BoundSql getBoundSql(Object parameterObject) {
+    // 获得 BoundSql 对象
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    // 忽略，因为 <parameterMap /> 已经废弃，参见 http://www.mybatis.org/mybatis-3/zh/sqlmap-xml.html 文档
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     if (parameterMappings == null || parameterMappings.isEmpty()) {
       boundSql = new BoundSql(configuration, boundSql.getSql(), parameterMap.getParameterMappings(), parameterObject);
     }
 
-    // check for nested result maps in parameter mappings (issue #30)
+    // 存储过程相关，暂时无视
     for (ParameterMapping pm : boundSql.getParameterMappings()) {
-      String rmId = pm.getResultMapId();
+    String rmId = pm.getResultMapId();
       if (rmId != null) {
         ResultMap rm = configuration.getResultMap(rmId);
         if (rm != null) {
