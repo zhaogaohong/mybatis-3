@@ -23,20 +23,52 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 参数映射
  * @author Clinton Begin
  */
 public class ParameterMapping {
 
+  // ParameterMapping.java
   private Configuration configuration;
 
+  /**
+   * 属性的名字
+   */
   private String property;
+  /**
+   * 参数类型。
+   *
+   * 目前只需要关注 ParameterMode.IN 的情况，另外的 OUT、INOUT 是在存储过程中使用，暂时无视
+   */
   private ParameterMode mode;
+  /**
+   * Java 类型
+   */
   private Class<?> javaType = Object.class;
   private JdbcType jdbcType;
+  /**
+   * 对于数值类型，还有一个小数保留位数的设置，来确定小数点后保留的位数
+   */
   private Integer numericScale;
+  /**
+   * TypeHandler 对象
+   *
+   * {@link Builder#resolveTypeHandler()}
+   */
   private TypeHandler<?> typeHandler;
+  /**
+   * 貌似只在 ParameterMode 在 OUT、INOUT 是在存储过程中使用
+   */
   private String resultMapId;
+  /**
+   * 貌似只在 ParameterMode 在 OUT、INOUT 是在存储过程中使用
+   */
   private String jdbcTypeName;
+  /**
+   * 表达式。
+   *
+   * ps：目前暂时不支持
+   */
   private String expression;
 
   private ParameterMapping() {

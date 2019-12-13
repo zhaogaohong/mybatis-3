@@ -105,6 +105,9 @@ public class Configuration {
   protected boolean safeRowBoundsEnabled;
   protected boolean safeResultHandlerEnabled = true;
   protected boolean mapUnderscoreToCamelCase;
+  /**
+   * 当开启时，任何方法的调用都会加载该对象的所有属性。否则，每个属性会按需加载（参考lazyLoadTriggerMethods)
+   */
   protected boolean aggressiveLazyLoading;
   protected boolean multipleResultSetsEnabled = true;
   protected boolean useGeneratedKeys;
@@ -119,6 +122,9 @@ public class Configuration {
   protected Class<? extends VFS> vfsImpl;
   protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
   protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
+  /**
+   * 指定哪个对象的方法触发一次延迟加载。
+   */
   protected Set<String> lazyLoadTriggerMethods = new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString"));
   protected Integer defaultStatementTimeout;
   protected Integer defaultFetchSize;
@@ -151,6 +157,7 @@ public class Configuration {
   protected final InterceptorChain interceptorChain = new InterceptorChain();
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+  //在 Configuration 的构造方法中，会进行初始化
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
 
   /**
@@ -162,7 +169,7 @@ public class Configuration {
       .conflictMessageProducer((savedValue, targetValue) ->
           ". please check " + savedValue.getResource() + " and " + targetValue.getResource());
   /**
-   * Cache 对象集合
+   * Cache 对象集合  二级缓存
    *
    * KEY：命名空间 namespace
    */
@@ -205,6 +212,10 @@ public class Configuration {
    * ResultMapResolver 集合
    */
   protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
+
+  /**
+   * 未完成的 MethodResolver 集合
+   */
   protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
 
   /*
@@ -250,6 +261,7 @@ public class Configuration {
     typeAliasRegistry.registerAlias("CGLIB", CglibProxyFactory.class);
     typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);
 
+    //    // 注册到 languageRegistry 中
     languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
     languageRegistry.register(RawLanguageDriver.class);
   }
@@ -598,10 +610,13 @@ public class Configuration {
    * @since 3.5.1
    */
   public LanguageDriver getLanguageDriver(Class<? extends LanguageDriver> langClass) {
+    // 获得 langClass 类
+    // 如果为空，则使用默认类
     if (langClass == null) {
       return languageRegistry.getDefaultDriver();
     }
     languageRegistry.register(langClass);
+    // 获得 LanguageDriver 对象
     return languageRegistry.getDriver(langClass);
   }
 
@@ -617,8 +632,11 @@ public class Configuration {
     return MetaObject.forObject(object, objectFactory, objectWrapperFactory, reflectorFactory);
   }
 
+  //创建 ParameterHandler 对象
   public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
+    // 创建 ParameterHandler 对象
     ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement, parameterObject, boundSql);
+    // 应用插件
     parameterHandler = (ParameterHandler) interceptorChain.pluginAll(parameterHandler);
     return parameterHandler;
   }
@@ -631,7 +649,9 @@ public class Configuration {
   }
 
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    // <1> 创建 RoutingStatementHandler 对象
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+    // 应用插件
     statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
     return statementHandler;
   }
@@ -640,9 +660,18 @@ public class Configuration {
     return newExecutor(transaction, defaultExecutorType);
   }
 
+  /**
+   * 创建 Executor 对象
+   *
+   * @param transaction 事务对象
+   * @param executorType 执行器类型
+   * @return Executor 对象
+   */
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
-    executorType = executorType == null ? defaultExecutorType : executorType;
-    executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
+    // <1> 获得执行器类型
+    executorType = executorType == null ? defaultExecutorType : executorType; // 使用默认
+    executorType = executorType == null ? ExecutorType.SIMPLE : executorType;// 使用 ExecutorType.SIMPLE
+    // <2> 创建对应实现的 Executor 对象
     Executor executor;
     if (ExecutorType.BATCH == executorType) {
       executor = new BatchExecutor(this, transaction);
@@ -651,11 +680,18 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
+    // <3> 如果开启缓存，创建 CachingExecutor 对象，进行包装
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+    // <4> 应用插件
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
+
+    //<1> 处，获得执行器类型。可以通过在 mybatis-config.xml 配置文件，如下：
+    //
+    //// value 有三种类型：SIMPLE REUSE BATCH
+    //<setting name="defaultExecutorType" value="" />
   }
 
   public void addKeyGenerator(String id, KeyGenerator keyGenerator) {
@@ -794,9 +830,11 @@ public class Configuration {
   }
 
   public MappedStatement getMappedStatement(String id, boolean validateIncompleteStatements) {
+    // 校验，保证所有 MappedStatement 已经构造完毕
     if (validateIncompleteStatements) {
       buildAllStatements();
     }
+    // 获取 MappedStatement 对象
     return mappedStatements.get(id);
   }
 
@@ -854,12 +892,12 @@ public class Configuration {
    */
   protected void buildAllStatements() {
     parsePendingResultMaps();
-    if (!incompleteCacheRefs.isEmpty()) {
+    if (!incompleteCacheRefs.isEmpty()) {// 保证 incompleteCacheRefs 被解析完
       synchronized (incompleteCacheRefs) {
         incompleteCacheRefs.removeIf(x -> x.resolveCacheRef() != null);
       }
     }
-    if (!incompleteStatements.isEmpty()) {
+    if (!incompleteStatements.isEmpty()) {// 保证 incompleteStatements 被解析完
       synchronized (incompleteStatements) {
         incompleteStatements.removeIf(x -> {
           x.parseStatementNode();
@@ -867,7 +905,7 @@ public class Configuration {
         });
       }
     }
-    if (!incompleteMethods.isEmpty()) {
+    if (!incompleteMethods.isEmpty()) {// 保证 incompleteMethods 被解析完
       synchronized (incompleteMethods) {
         incompleteMethods.removeIf(x -> {
           x.resolve();

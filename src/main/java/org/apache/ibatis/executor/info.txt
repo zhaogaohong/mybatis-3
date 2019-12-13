@@ -1,0 +1,43 @@
+我们来分享 SQL 执行的流程。在 《精尽 MyBatis 源码分析 —— 项目结构一览》 中，我们简单介绍这个流程如下：
+
+对应 executor 和 cursor 模块。前者对应执行器，后者对应执行结果的游标。
+
+SQL 语句的执行涉及多个组件 ，其中比较重要的是 Executor、StatementHandler、ParameterHandler 和 ResultSetHandler 。
+
+Executor 主要负责维护一级缓存和二级缓存，并提供事务管理的相关操作，它会将数据库相关操作委托给 StatementHandler完成。
+StatementHandler 首先通过 ParameterHandler 完成 SQL 语句的实参绑定，然后通过 java.sql.Statement 对象执行 SQL 语句并得到结果集，
+最后通过 ResultSetHandler 完成结果集的映射，得到结果对象并返回。
+
+在开始看具体源码之间，我们先来理解二级缓存的定义：
+
+FROM 凯伦 《聊聊MyBatis缓存机制》
+
+在上文中提到的一级缓存中，其最大的共享范围就是一个 SqlSession 内部，如果多个 SqlSession 之间需要共享缓存，
+则需要使用到二级缓存。开启二级缓存后，会使用 CachingExecutor 装饰 Executor ，进入一级缓存的查询流程前，
+先在 CachingExecutor 进行二级缓存的查询，具体的工作流程如下所示。
+那么，二级缓存，反应到具体代码里，是长什么样的呢？我们来打开 MappedStatement 类，代码如下：
+/**
+ * Cache 对象
+ */
+private Cache cache;
+最终在 Configuration 类中的体现:
+通过在 mybatis-config.xml 中，配置如下开启二级缓存功能：
+<setting name="cacheEnabled" value="true"/>
+
+ SQL 执行的第二部分
+ 整体是以 StatementHandler 为核心。所以，本文主要会看到的就是 StatementHandler 对 JDBC Statement 的各种操作
+
+  SQL 执行的第三部分，keygen 包
+  整体是以 KeyGenerator 为核心。所以，本文主要会看到的就是 KeyGenerator 对自增主键的获取
+
+  SQL 执行的第四部分，SQL 执行后，响应的结果集 ResultSet 的处理，涉及 executor/resultset、executor/result、cursor 包
+
+ SQL 执行的第五部分，延迟加载的功能的实现，涉及 executor/loader 包
+ 从类图，我们发现，延迟加载的功能，是通过动态代理实现的。也就是说，通过拦截指定方法，执行数据加载，从而实现延迟加载。
+ 并且，MyBatis 提供了 Cglib 和 Javassist 两种动态代理的创建方式。
+
+ 我们已经详细解析了 MyBatis 执行器 Executor 相关的内容，但是显然，Executor 是不适合直接暴露给用户使用的，而是需要通过 SqlSession
+ 核心是 SqlSession 。
+ SqlSessionFactory ，负责创建 SqlSession 对象的工厂。
+ SqlSessionFactoryBuilder ，是 SqlSessionFactory 的构建器。
+ 下面，我们按照 SqlSessionFactoryBuilder => SqlSessionFactory => SqlSession 来详细解析。

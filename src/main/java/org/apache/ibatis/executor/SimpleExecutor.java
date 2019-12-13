@@ -32,6 +32,9 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 继承 BaseExecutor 抽象类，简单的 Executor 实现类
+ * 每次开始读或写操作，都创建对应的 Statement 对象。
+ * 执行完成后，关闭该 Statement 对象。
  * @author Clinton Begin
  */
 public class SimpleExecutor extends BaseExecutor {
@@ -40,15 +43,20 @@ public class SimpleExecutor extends BaseExecutor {
     super(configuration, transaction);
   }
 
+  //一般是写类操作，例如：insert、update、delete
   @Override
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      // 创建 StatementHandler 对象
       StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
+      // 初始化 StatementHandler 对象
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // <3> 执行 StatementHandler ，进行写操作
       return handler.update(stmt);
     } finally {
+      // 关闭 StatementHandler 对象
       closeStatement(stmt);
     }
   }
@@ -58,10 +66,14 @@ public class SimpleExecutor extends BaseExecutor {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      // <1> 创建 StatementHandler 对象
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+      // <2> 初始化 StatementHandler 对象
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // <3> 执行 StatementHandler  ，进行读操作
       return handler.query(stmt, resultHandler);
     } finally {
+      // <4> 关闭 StatementHandler 对象
       closeStatement(stmt);
     }
   }
@@ -76,15 +88,20 @@ public class SimpleExecutor extends BaseExecutor {
     return cursor;
   }
 
+  //不存在批量操作的情况，所以直接返回空数组。
   @Override
   public List<BatchResult> doFlushStatements(boolean isRollback) {
     return Collections.emptyList();
   }
 
+  //初始化 StatementHandler 对象。
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
+    // <2.1> 获得 Connection 对象
     Connection connection = getConnection(statementLog);
+    // <2.2> 创建 Statement 或 PrepareStatement 对象
     stmt = handler.prepare(connection, transaction.getTimeout());
+    // <2.3> 设置 SQL 上的参数，例如 PrepareStatement 对象上的占位符
     handler.parameterize(stmt);
     return stmt;
   }

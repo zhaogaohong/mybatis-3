@@ -25,26 +25,37 @@ import org.apache.ibatis.cache.decorators.TransactionalCache;
  */
 public class TransactionalCacheManager {
 
+  /**
+   * Cache 和 TransactionalCache 的映射
+   */
   private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
 
   public void clear(Cache cache) {
     getTransactionalCache(cache).clear();
   }
 
+  //获得缓存中，指定 Cache + K 的值
   public Object getObject(Cache cache, CacheKey key) {
+    // 首先，获得 Cache 对应的 TransactionalCache 对象
+    // 然后从 TransactionalCache 对象中，获得 key 对应的值
     return getTransactionalCache(cache).getObject(key);
   }
 
+  //添加 Cache + KV ，到缓存中
   public void putObject(Cache cache, CacheKey key, Object value) {
+    // 首先，获得 Cache 对应的 TransactionalCache 对象
+    // 然后，添加 KV 到 TransactionalCache 对象中
     getTransactionalCache(cache).putObject(key, value);
   }
 
+  //提交所有 TransactionalCache
   public void commit() {
     for (TransactionalCache txCache : transactionalCaches.values()) {
       txCache.commit();
     }
   }
 
+  //回滚所有 TransactionalCache
   public void rollback() {
     for (TransactionalCache txCache : transactionalCaches.values()) {
       txCache.rollback();
