@@ -68,7 +68,6 @@ public class SqlSessionFactoryBuilder {
       try {
         reader.close();
       } catch (IOException e) {
-        // Intentionally ignore. Prefer previous error.
       }
     }
   }
