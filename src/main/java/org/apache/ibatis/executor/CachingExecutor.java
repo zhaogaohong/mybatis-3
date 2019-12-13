@@ -96,8 +96,9 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
     // 获得 BoundSql 对象
+    //根据传入的参数动态获得SQL语句，最后返回用BoundSql对象表示
     BoundSql boundSql = ms.getBoundSql(parameterObject);
-    // 创建 CacheKey 对象
+    // 创建 CacheKey 对象     //为本次查询创建缓存的Key
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
     // 查询
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
